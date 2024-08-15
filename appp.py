@@ -167,7 +167,7 @@ def main():
 
                 # Create and display the Folium map
                 folium_map_html = create_folium_map(city_data, optimal_route, G, flow_dict, fc_data)
-                components.html(folium_map_html, height=600)
+                components.html(folium_map_html, height=1000)
         else:
             st.sidebar.info("Please select an FC and at least one DC to enable the calculation.")
 
