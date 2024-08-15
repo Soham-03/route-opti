@@ -5,7 +5,6 @@ import folium
 import random
 from itertools import permutations
 import streamlit.components.v1 as components
-import random
 
 def generate_graph(fc_data):
     num_nodes = len(fc_data)
@@ -120,59 +119,57 @@ def create_folium_map(city_data, optimal_route, G, flow_dict, fc_data):
 def main():
     st.title("Optimal Route Finder")
 
-    # Upload FC and DC CSV files
-    fc_file = st.file_uploader("Upload FC CSV", type=["csv"])
-    dc_file = st.file_uploader("Upload DC CSV", type=["csv"])
+    # Sidebar for inputs
+    st.sidebar.header("Upload Files")
+    fc_file = st.sidebar.file_uploader("Upload FC CSV", type=["csv"])
+    dc_file = st.sidebar.file_uploader("Upload DC CSV", type=["csv"])
 
+    # Display the uploaded files and their columns
     if fc_file and dc_file:
         fc_data = pd.read_csv(fc_file)
         dc_data = pd.read_csv(dc_file)
 
-        # Display the uploaded files and their columns
-        st.write("FC Data:")
-        st.write(fc_data)
-        st.write("FC Columns:")
-        st.write(fc_data.columns)  # Print column names
+        st.sidebar.write("FC Data:")
+        st.sidebar.write(fc_data)
+        st.sidebar.write("FC Columns:")
+        st.sidebar.write(fc_data.columns)  # Print column names
 
-        st.write("DC Data:")
-        st.write(dc_data)
-        st.write("DC Columns:")
-        st.write(dc_data.columns)  # Print column names
+        st.sidebar.write("DC Data:")
+        st.sidebar.write(dc_data)
+        st.sidebar.write("DC Columns:")
+        st.sidebar.write(dc_data.columns)  # Print column names
 
         # Check if required columns exist
         if 'latitude' not in fc_data.columns or 'longitude' not in fc_data.columns:
-            st.error("FC CSV must contain 'latitude' and 'longitude' columns.")
+            st.sidebar.error("FC CSV must contain 'latitude' and 'longitude' columns.")
             return
 
         if 'latitude' not in dc_data.columns or 'longitude' not in dc_data.columns:
-            st.error("DC CSV must contain 'latitude' and 'longitude' columns.")
+            st.sidebar.error("DC CSV must contain 'latitude' and 'longitude' columns.")
             return
 
-        # Convert FC and DC data to the format needed
-        # fc_data = fc_data.rename(columns={'latitude': 'lat', 'longitude': 'lng'}, errors='ignore')
-        # dc_data = dc_data.rename(columns={'latitude': 'lat', 'longitude': 'lng'}, errors='ignore')
-
         # Select FC and DCs
-        selected_fc = st.selectbox('Select FC', options=fc_data['city'].tolist())
-        selected_dcs = st.multiselect('Select DCs', options=dc_data['city'].tolist())
+        st.sidebar.header("Select FC and DCs")
+        selected_fc = st.sidebar.selectbox('Select FC', options=fc_data['city'].tolist())
+        selected_dcs = st.sidebar.multiselect('Select DCs', options=dc_data['city'].tolist())
 
         # Enable button only if an FC and at least one DC are selected
         if selected_fc and selected_dcs:
-            if st.button('Calculate Optimal Route'):
+            if st.sidebar.button('Calculate Optimal Route'):
                 G, flow_dict, city_data = generate_graph(fc_data)
 
                 # Calculate the optimal route
                 selected_cities = [selected_fc] + selected_dcs
                 optimal_route, optimal_cost = tsp_bruteforce(G, selected_cities, selected_fc)
 
-                st.write(f"Optimal Route: {optimal_route}")
-                st.write(f"Optimal Cost: {optimal_cost}")
+                st.sidebar.write(f"Optimal Route: {optimal_route}")
+                st.sidebar.write(f"Optimal Cost: {optimal_cost}")
 
                 # Create and display the Folium map
                 folium_map_html = create_folium_map(city_data, optimal_route, G, flow_dict, fc_data)
                 components.html(folium_map_html, height=600)
         else:
-            st.info("Please select an FC and at least one DC to enable the calculation.")
+            st.sidebar.info("Please select an FC and at least one DC to enable the calculation.")
 
 if __name__ == "__main__":
     main()
